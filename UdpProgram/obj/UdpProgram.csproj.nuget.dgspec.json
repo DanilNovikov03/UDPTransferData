@@ -1,23 +1,24 @@
 {
   "format": 1,
   "restore": {
-    "G:\\DanilN\\UdpTransferDataApp\\UdpProgram\\UdpProgram.csproj": {}
+    "Z:\\Ucheba\\LearnCode\\UDPTransferData\\UdpProgram\\UdpProgram.csproj": {}
   },
   "projects": {
-    "G:\\DanilN\\UdpTransferDataApp\\UdpProgram\\UdpProgram.csproj": {
+    "Z:\\Ucheba\\LearnCode\\UDPTransferData\\UdpProgram\\UdpProgram.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "G:\\DanilN\\UdpTransferDataApp\\UdpProgram\\UdpProgram.csproj",
+        "projectUniqueName": "Z:\\Ucheba\\LearnCode\\UDPTransferData\\UdpProgram\\UdpProgram.csproj",
         "projectName": "UdpProgram",
-        "projectPath": "G:\\DanilN\\UdpTransferDataApp\\UdpProgram\\UdpProgram.csproj",
-        "packagesPath": "C:\\Users\\root\\.nuget\\packages\\",
-        "outputPath": "G:\\DanilN\\UdpTransferDataApp\\UdpProgram\\obj\\",
+        "projectPath": "Z:\\Ucheba\\LearnCode\\UDPTransferData\\UdpProgram\\UdpProgram.csproj",
+        "packagesPath": "C:\\Users\\danil\\.nuget\\packages\\",
+        "outputPath": "Z:\\Ucheba\\LearnCode\\UDPTransferData\\UdpProgram\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
-          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\root\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\danil\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -37,7 +38,13 @@
           "warnAsError": [
             "NU1605"
           ]
-        }
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net7.0": {
@@ -53,12 +60,30 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[7.0.20, 7.0.20]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Host.win-x64",
+              "version": "[7.0.20, 7.0.20]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[7.0.20, 7.0.20]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[7.0.20, 7.0.20]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.400\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.304\\RuntimeIdentifierGraph.json"
         }
       }
     }

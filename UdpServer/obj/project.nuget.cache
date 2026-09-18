@@ -1,8 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "MjkenMFg7L5siKOeO5Ctg5bjyDURYdnSHHoDrVowsPKcY3piPX2/Gm4ejEjl4jF262kNGXHSU6C3gfq2ORbh5Q==",
+  "dgSpecHash": "u64BaQf45kw=",
   "success": true,
-  "projectFilePath": "G:\\DanilN\\UdpTransferDataApp\\UdpServer\\UdpServer.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "Z:\\Ucheba\\LearnCode\\UDPTransferData\\UdpServer\\UdpServer.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\danil\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\7.0.20\\microsoft.windowsdesktop.app.ref.7.0.20.nupkg.sha512",
+    "C:\\Users\\danil\\.nuget\\packages\\microsoft.netcore.app.ref\\7.0.20\\microsoft.netcore.app.ref.7.0.20.nupkg.sha512",
+    "C:\\Users\\danil\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\7.0.20\\microsoft.aspnetcore.app.ref.7.0.20.nupkg.sha512",
+    "C:\\Users\\danil\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\7.0.20\\microsoft.netcore.app.host.win-x64.7.0.20.nupkg.sha512"
+  ],
   "logs": []
 }
