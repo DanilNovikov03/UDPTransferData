@@ -2,6 +2,7 @@
 using System.Net;
 using System.Text;
 using UdpProgram.Udp;
+using UdpProgram.Handlers;
 
 public class UDPClient
 {
@@ -48,7 +49,7 @@ public class UDPClient
 
     private async Task PacketSendingAsync(byte[] data)
     {
-        List<UdpPacket> packets = UdpSeparationData.SeparationDataToPacket(data);
+        List<UdpPacket> packets = UdpSeparationData.SplitIntoPackets(data);
 
         int totalPackets = packets.Count;
         await SendPacketCountAsync(totalPackets);
