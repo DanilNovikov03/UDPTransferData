@@ -5,10 +5,10 @@
         private readonly object lockObject = new object();
 
         private HashSet<uint> _receivedPacketIds;
-        private List<uint> _missingPacketIds;
+        private List<uint> _missingPacketIds; // todo: Perhaps it’s worth rewriting it using HashSet.
 
         private uint? _expectedPacketCount;
-        private uint _maxReceivedPacketId; // todo: The variable is not used. It is possible to delete.
+        private uint _maxReceivedPacketId;
 
         public PacketChecker(uint? expectedPacketCount = null)
         {
@@ -17,6 +17,7 @@
             _expectedPacketCount = expectedPacketCount;
             _maxReceivedPacketId = 0;
         }
+
 
         public void SetExpectedPacketCount(uint expectedPacketCount)
         {
@@ -90,26 +91,23 @@
         private bool IsAllPacketsReceived() =>
             (_receivedPacketIds.Count == _expectedPacketCount) && !HasLostPackets();
 
-        private void ResetAllValues()
-        {
-            _receivedPacketIds.Clear();
-            _missingPacketIds.Clear();
-            _expectedPacketCount = null;
-            _maxReceivedPacketId = 0;
-        }
-
         private void CheckMissingPacketId(uint packetId)
         {
-            for (uint i = _maxReceivedPacketId; i < packetId; i++)
-                if (!HasPacketReceived(i) && !_missingPacketIds.Contains(i))
-                    _missingPacketIds.Add(i);
+            CheckPreviousPackets(packetId);
 
-            if (packetId < _maxReceivedPacketId && !HasPacketReceived(packetId))
-            {
-                _receivedPacketIds.Add(packetId);
-                _missingPacketIds.Remove(packetId);
-            }
+            _maxReceivedPacketId = packetId > _maxReceivedPacketId ? packetId : _maxReceivedPacketId;
+            _missingPacketIds.Remove(packetId);
         }
+
+        private void CheckPreviousPackets(uint packetId)
+        {
+            for (uint i = _maxReceivedPacketId; i < packetId; i++)
+                if (IsKnownPacket(packetId))
+                    _missingPacketIds.Add(i);
+        }
+
+        private bool IsKnownPacket(uint packetId) =>
+            !HasPacketReceived(packetId) && !_missingPacketIds.Contains(packetId);
 
         private List<uint> SearchMissingPackets()
         {
@@ -124,6 +122,14 @@
 
         private bool HasPacketReceived(uint packetId) =>
             _receivedPacketIds.Contains(packetId);
+
+        private void ResetAllValues()
+        {
+            _receivedPacketIds.Clear();
+            _missingPacketIds.Clear();
+            _expectedPacketCount = null;
+            _maxReceivedPacketId = 0;
+        }
 
         private void EnsureExpectedCountIsSet()
         {
