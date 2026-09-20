@@ -3,60 +3,63 @@
     public class PacketChecker
     {
         private readonly object lockObject = new object();
-        private HashSet<uint> ReceivedPacketIds;
-        private List<uint> MissingPacketIds;
-        private uint? ExpectedPacketCount;
-        private uint MaxReceivedPacketId;
+
+        private HashSet<uint> _receivedPacketIds;
+        private List<uint> _missingPacketIds;
+
+        private uint? _expectedPacketCount;
+        private uint _maxReceivedPacketId; // todo: The variable is not used. It is possible to delete.
 
         public PacketChecker(uint? expectedPacketCount = null)
         {
-            ReceivedPacketIds = new HashSet<uint>();
-            MissingPacketIds = new List<uint>();
-            ExpectedPacketCount = expectedPacketCount;
-            MaxReceivedPacketId = 0;
+            _receivedPacketIds = new HashSet<uint>();
+            _missingPacketIds = new List<uint>();
+            _expectedPacketCount = expectedPacketCount;
+            _maxReceivedPacketId = 0;
         }
 
         public void SetExpectedPacketCount(uint expectedPacketCount)
         {
             lock (lockObject)
-                ExpectedPacketCount = expectedPacketCount;
+                _expectedPacketCount = expectedPacketCount;
         }
 
         public void ResetExpectedPacketCount()
         {
             lock (lockObject)
-                ExpectedPacketCount = null;
+                _expectedPacketCount = null;
         }
 
         public bool HasLostPackets()
         {
             lock (lockObject)
-                return MissingPacketIds.Count > 0;
+                return _missingPacketIds.Count > 0;
         }
 
         public List<uint> GetMissingPacketIds()
         {
             lock (lockObject)
-                return new List<uint>(MissingPacketIds);
+                //return new List<uint>(MissingPacketIds);
+                return _missingPacketIds; // todo: Test, If it’s bad, then remove it
         }
 
         public void AddMissingPackets(IEnumerable<uint> missingPackets)
         {
             lock (lockObject)
             {
-                var newMissingPackets = missingPackets.Except(MissingPacketIds).ToList();
-                MissingPacketIds.AddRange(newMissingPackets);
+                var newMissingPackets = missingPackets.Except(_missingPacketIds).ToList();
+                _missingPacketIds.AddRange(newMissingPackets);
             }
         }
 
         public bool AddReceivedPacketId(uint packetId)
         {
-            if (!ExpectedPacketCount.HasValue)
+            if (IsExpectedCountMissing())
                 return false;
 
             lock (lockObject)
             {
-                ReceivedPacketIds.Add(packetId);
+                _receivedPacketIds.Add(packetId);
                 CheckMissingPacketId(packetId);
             }
             return true;
@@ -64,58 +67,71 @@
 
         public bool HaveAllPackages()
         {
-            if (!ExpectedPacketCount.HasValue)
-                throw new InvalidOperationException("ExpectedPacketCount is not set.");
+            EnsureExpectedCountIsSet();
 
             lock (lockObject)
-                return (ReceivedPacketIds.Count == ExpectedPacketCount) && !HasLostPackets();
+                return IsAllPacketsReceived();
         }
 
         public List<uint> FullGetMissingPacketIds()
         {
-            if (!ExpectedPacketCount.HasValue)
-                throw new InvalidOperationException("ExpectedPacketCount is not set.");
-
-            List<uint> missingPacketsId = new List<uint>();
-
+            EnsureExpectedCountIsSet();
             lock (lockObject)
-            {
-                for (uint i = 0; i < ExpectedPacketCount; i++)
-                    if (!ReceivedPacketIds.Contains(i))
-                        missingPacketsId.Add(i);
-            }
-
-            return missingPacketsId;
+                return SearchMissingPackets();
         }
 
         public void Reset()
         {
             lock (lockObject)
-            {
-                ReceivedPacketIds.Clear();
-                MissingPacketIds.Clear();
-                ExpectedPacketCount = null;
-                MaxReceivedPacketId = 0;
-            }
+                ResetAllValues();
+        }
+
+
+        private bool IsAllPacketsReceived() =>
+            (_receivedPacketIds.Count == _expectedPacketCount) && !HasLostPackets();
+
+        private void ResetAllValues()
+        {
+            _receivedPacketIds.Clear();
+            _missingPacketIds.Clear();
+            _expectedPacketCount = null;
+            _maxReceivedPacketId = 0;
         }
 
         private void CheckMissingPacketId(uint packetId)
         {
-            lock (lockObject)
+            for (uint i = _maxReceivedPacketId; i < packetId; i++)
+                if (!HasPacketReceived(i) && !_missingPacketIds.Contains(i))
+                    _missingPacketIds.Add(i);
+
+            if (packetId < _maxReceivedPacketId && !HasPacketReceived(packetId))
             {
-                for (uint i = MaxReceivedPacketId; i < packetId; i++)
-                    if (!ReceivedPacketIds.Contains(i) && !MissingPacketIds.Contains(i))
-                        MissingPacketIds.Add(i);
-
-                if (packetId < MaxReceivedPacketId && !ReceivedPacketIds.Contains(packetId))
-                {
-                    ReceivedPacketIds.Add(packetId);
-                    MissingPacketIds.Remove(packetId);
-                }
-
-                MaxReceivedPacketId = packetId > MaxReceivedPacketId ? packetId : MaxReceivedPacketId;
-                MissingPacketIds.Remove(packetId);
+                _receivedPacketIds.Add(packetId);
+                _missingPacketIds.Remove(packetId);
             }
         }
+
+        private List<uint> SearchMissingPackets()
+        {
+            List<uint> missingPacketsId = new List<uint>();
+
+            for (uint i = 0; i < _expectedPacketCount; i++)
+                if (!HasPacketReceived(i))
+                    missingPacketsId.Add(i);
+
+            return missingPacketsId;
+        }
+
+        private bool HasPacketReceived(uint packetId) =>
+            _receivedPacketIds.Contains(packetId);
+
+        private void EnsureExpectedCountIsSet()
+        {
+            if (IsExpectedCountMissing())
+                throw new InvalidOperationException("ExpectedPacketCount is not set.");
+        }
+
+        private bool IsExpectedCountMissing() =>
+            !_expectedPacketCount.HasValue;
     }
 }
