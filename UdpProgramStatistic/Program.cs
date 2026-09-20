@@ -1,6 +1,8 @@
 ﻿using System.Text;
 using UdpProgramStatistic;
 
+string ip = "192.168.56.101";
+
 CustomUdpClient client = new CustomUdpClient("192.168.56.101", 4004); // IP-адрес вашей виртуальной машины
 while (true)
 {
@@ -24,6 +26,6 @@ static byte[] GenerateRandomData()
 
 /*
 int port = 4004;
-CustomUdpServer server = new CustomUdpServer(port);
-server.StartReceiving();
+CustomUdpServer server = new CustomUdpServer(port, ip);
+await server.StartReceivingAsync();
 */

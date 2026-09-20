@@ -1,4 +1,6 @@
-﻿namespace UdpProgram.Udp
+﻿using UdpProgram.Udp;
+
+namespace UdpProgram.Handlers
 {
     public class ServerPacketLossHandler
     {

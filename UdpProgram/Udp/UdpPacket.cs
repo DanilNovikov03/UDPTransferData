@@ -1,6 +1,4 @@
-﻿
-
-namespace UdpProgram.Udp
+﻿namespace UdpProgram.Udp
 {
     public class UdpPacket
     {
@@ -16,8 +14,17 @@ namespace UdpProgram.Udp
             Data = data;
         }
 
+
+        public byte[] ToBytes() =>
+            PacketToArrayBytes();
         
-        public byte[] ToBytes()
+        public static UdpPacket FromBytes(byte[] bytes)
+        {
+            (uint packetId, byte[] data) = ExtractPacket(bytes);
+            return new UdpPacket(packetId, data);
+        }
+
+        private byte[] PacketToArrayBytes()
         {
             List<byte> result = new List<byte>();
 
@@ -28,16 +35,16 @@ namespace UdpProgram.Udp
 
             return result.ToArray();
         }
-        
-        public static UdpPacket FromBytes(byte[] bytes)
+
+        private static (uint packetId, byte[] data) ExtractPacket(byte[] bytes)
         {
             int sizeData = bytes.Length - PacketIdByteSize;
 
             uint packetId = BitConverter.ToUInt32(bytes, 0);
             byte[] segmentsData = new byte[sizeData];
-            Buffer.BlockCopy(bytes, 4, segmentsData, 0, segmentsData.Length);
+            Buffer.BlockCopy(bytes, PacketIdByteSize, segmentsData, 0, segmentsData.Length);
 
-            return new UdpPacket(packetId, segmentsData);
+            return (packetId, segmentsData);
         }
     }
 }
