@@ -1,50 +1,45 @@
-﻿using UdpProgram.Udp;
+﻿using System.Net.Sockets;
+using System.Text;
+using UdpProgram.Protocol;
+using UdpProgram.Udp;
 
 namespace UdpProgram.UDPServer
 {
-    public class ServerPacketLossHandler
+    internal class ServerPacketLossHandler
     {
-        private readonly PacketChecker packetChecker;
-        private readonly UDPServer udpServer;
-        private readonly Timer packetCheckTimer;
-        private uint expectedPackets;
-        private int checkIntervalMilliseconds;
+        private UdpClient _sender;
+        private PacketChecker _packetChecker;
+        private Timer _timer;
 
-        public ServerPacketLossHandler(PacketChecker packetChecker, UDPServer udpServer, int checkIntervalMilliseconds = 100)
+        public ServerPacketLossHandler(string clientIpAddres, int clientPort, PacketChecker checker, int timeSendLostPacketIds = 100)
         {
-            this.packetChecker = packetChecker;
-            this.udpServer = udpServer;
-            this.checkIntervalMilliseconds = checkIntervalMilliseconds;
-            packetCheckTimer = new Timer(CheckForLostPackets, null, Timeout.Infinite, Timeout.Infinite);
+            _sender = new UdpClient(clientIpAddres, clientPort);
+            _packetChecker = checker;
+
+            _timer = new Timer(SendLostPacketIds, null, timeSendLostPacketIds, timeSendLostPacketIds);
         }
 
-        public void Start(uint expectedPackets)
+        private async void SendLostPacketIds(object state)
         {
-            this.expectedPackets = expectedPackets;
-            packetChecker.SetExpectedPacketCount(expectedPackets);
-            packetCheckTimer.Change(checkIntervalMilliseconds, checkIntervalMilliseconds);
+            List<uint> lostPackets = _packetChecker.GetLostPackets();
+            if (lostPackets.Any())
+            {
+                byte[] data = MessageLostPacketIds(lostPackets);
+
+                string message = string.Join(", ", lostPackets);
+                Console.WriteLine("Отправлены потерянные пакеты: " + message); // TODO убрать
+
+                await _sender.SendAsync(data, data.Length);
+            }
         }
 
-        public void Stop() =>
-            packetCheckTimer.Change(Timeout.Infinite, Timeout.Infinite);
-
-        private void CheckForLostPackets(object state)
+        private byte[] MessageLostPacketIds(List<uint> lostPackets)
         {
-            List<uint> missingIds;
-            lock (packetChecker)
-            {
-                missingIds = packetChecker.FullGetMissingPacketIds();
-            }
+            string lostPacketsMessage = string.Join(", ", lostPackets);
+            string message = UdpProtocolConstant.LostPacketsId + lostPacketsMessage;
+            byte[] data = UdpDataConverter.StringToBytes(message);
 
-            if (missingIds.Any())
-            {
-                lock (packetChecker)
-                {
-                    packetChecker.AddMissingPackets(missingIds);
-                }
-                Console.WriteLine("Обнаружены потерянные пакеты: " + string.Join(", ", missingIds));
-                udpServer.SendLostPackets(missingIds);
-            }
+            return data;
         }
     }
 }
