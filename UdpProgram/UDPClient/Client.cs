@@ -5,7 +5,7 @@ using UdpProgram.Udp;
 using UdpProgram.Protocol;
 using UdpProgram.UDPClient;
 
-public class UDPClient
+public class Client
 {
     public List<UdpPacket> SentPackets { get; private set; }
 
@@ -21,7 +21,7 @@ public class UDPClient
     private const string ConfirmationId = "CONFIRMATION";
     private const string LostPacketsId = "LOST_PACKETS";
 
-    public UDPClient(string serverIpAddress, int serverPort, string confirmationIpAddress, int confirmationPort)
+    public Client(string serverIpAddress, int serverPort, string confirmationIpAddress, int confirmationPort)
     {
         SentPackets = new List<UdpPacket>();
         _packetLossHandler = new ClientPacketLossHandler(this);
