@@ -1,4 +1,6 @@
 ﻿
+using UdpProgram.Udp;
+/*
 await Task.Run(async () =>
 {
     string serverAddress = "192.168.56.101";
@@ -26,3 +28,14 @@ static byte[] GenerateRandomData()
     random.NextBytes(data);
     return data;
 }
+*/
+await Task.Run(async () =>
+{
+    string localIp = "192.168.1.103";
+    string remoteIp = "192.168.1.104";
+    int port = 4004;
+
+    UDPServer server = new UDPServer(localIp, port, remoteIp);
+
+    await server.StartReceivingAsync();
+});
