@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UdpProgram.Udp;
 
-namespace UdpProgram.Handlers
+namespace UdpProgram.UDPClient
 {
     public class ClientPacketLossHandler
     {

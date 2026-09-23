@@ -1,6 +1,6 @@
 ﻿using UdpProgram.Udp;
 
-namespace UdpProgram.Handlers
+namespace UdpProgram.UDPServer
 {
     public class ServerPacketLossHandler
     {
