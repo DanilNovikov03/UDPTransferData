@@ -17,8 +17,6 @@ public class Client
     private readonly int _confirmationPort;
     private ClientPacketLossHandler _packetLossHandler;
 
-    // Constant
-    private const string ConfirmationId = "CONFIRMATION";
     private const string LostPacketsId = "LOST_PACKETS";
 
     public Client(string serverIpAddress, int serverPort, string confirmationIpAddress, int confirmationPort)
@@ -106,7 +104,7 @@ public class Client
             }
             else if (message.StartsWith(UdpProtocolConstant.LostPacketsId))
             {
-                string[] parts = message.Substring(LostPacketsId.Length + 1).Split(',');
+                string[] parts = message.Substring(UdpProtocolConstant.LostPacketsId.Length + 1).Split(',');
                 List<uint> lostPackets = parts.Select(uint.Parse).ToList();
 
                 Console.WriteLine("Потерянные пакеты: " + string.Join(", ", lostPackets));

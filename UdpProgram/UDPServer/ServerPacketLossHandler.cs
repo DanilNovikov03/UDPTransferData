@@ -15,24 +15,24 @@ namespace UdpProgram.UDPServer
             _sender = new UdpClient(clientIpAddres, clientPort);
             _packetChecker = checker;
 
-            _timer = new Timer(SendLostPacketIds, null, timeSendLostPacketIds, timeSendLostPacketIds);
+            _timer = new Timer(SendLostIdPackets, null, timeSendLostPacketIds, timeSendLostPacketIds);
         }
 
-        private async void SendLostPacketIds(object state)
+        private async void SendLostIdPackets(object state)
         {
-            List<uint> lostPackets = _packetChecker.GetLostPackets();
+            List<uint> lostPackets = _packetChecker.GetIdLostPackets();
             if (lostPackets.Any())
             {
-                byte[] data = MessageLostPacketIds(lostPackets);
+                byte[] data = MessageLostIdPackets(lostPackets);
 
                 string message = string.Join(", ", lostPackets);
-                Console.WriteLine("Отправлены потерянные пакеты: " + message); // TODO убрать
+                Console.WriteLine("Отправлен список потерянных пакетов: " + message); // TODO убрать
 
                 await _sender.SendAsync(data, data.Length);
             }
         }
 
-        private byte[] MessageLostPacketIds(List<uint> lostPackets)
+        private byte[] MessageLostIdPackets(List<uint> lostPackets)
         {
             string lostPacketsMessage = string.Join(", ", lostPackets);
             string message = UdpProtocolConstant.LostPacketsId + lostPacketsMessage;

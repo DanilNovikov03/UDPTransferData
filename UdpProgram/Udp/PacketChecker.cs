@@ -25,7 +25,7 @@ namespace UdpProgram.Udp
 
 
         // TODO сделать второй список ожидаемых пакетов
-        public List<uint> GetLostPackets()
+        public List<uint> GetIdLostPackets()
         {
             List<uint> copyLostPackets = new List<uint>(_lostPackets);
             //List<uint> copyLostPackets = _lostPackets.ToList(); TODO протестировать
