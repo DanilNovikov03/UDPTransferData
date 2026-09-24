@@ -32,5 +32,16 @@ namespace UdpProgram.Protocol
 
             return new UdpPacket(packetId, segmentsData);
         }
+
+        public static string RemovePrefix(string input, string prefix) =>
+            input.Substring(prefix.Length).Trim();
+
+        public static List<uint> ParseLostIPackets(string lostIdPacketsMessage)
+        {
+            return lostIdPacketsMessage
+                    .Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(uint.Parse)
+                    .ToList();
+        }
     }
 }

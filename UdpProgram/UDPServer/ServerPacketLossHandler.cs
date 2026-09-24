@@ -6,6 +6,7 @@ namespace UdpProgram.UDPServer
 {
     internal class ServerPacketLossHandler
     {
+        // TODO Create an interface for interacting with the circular buffer.
         private UdpClient _sender;
         private PacketChecker _packetChecker;
         private Timer _timer;
@@ -26,7 +27,7 @@ namespace UdpProgram.UDPServer
                 byte[] data = MessageLostIdPackets(lostPackets);
 
                 string message = string.Join(", ", lostPackets);
-                Console.WriteLine("Отправлен список потерянных пакетов: " + message); // TODO убрать
+                Console.WriteLine("Отправлен список потерянных пакетов: " + message); // TODO убрать после отладки
 
                 await _sender.SendAsync(data, data.Length);
             }

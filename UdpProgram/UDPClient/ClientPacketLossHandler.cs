@@ -1,45 +1,47 @@
-﻿using UdpProgram.Udp;
+﻿using System.Net.Sockets;
+using UdpProgram.Protocol;
+
 
 namespace UdpProgram.UDPClient
 {
-    public class ClientPacketLossHandler
+    internal class ClientPacketLossHandler
     {
-        private readonly Client _client;
-        private List<uint> _idLostPackets;
-        private List<UdpPacket> _lostPackets;
+        private UdpClient _receiverCommand;
 
-
-        public ClientPacketLossHandler(Client udpClient) 
+        public ClientPacketLossHandler(int clientPort)
         {
-            _client = udpClient;
-            _idLostPackets = new List<uint>();
-            _lostPackets = new List<UdpPacket>();
+            _receiverCommand = new UdpClient(clientPort);
+            StartListening();
         }
 
 
-        public async Task ResendLostPacketsAsync()
+        // TODO Think about how to do it in a separate thread
+        private void StartListening()
         {
-            foreach (var packet in _lostPackets)
-                await _client.SendPacketAsync(packet);
-            
-            _idLostPackets.Clear();
-            _lostPackets.Clear();
+            Task.Run(async () =>
+            {
+                while (true)
+                {
+                    var receivedData = await _receiverCommand.ReceiveAsync();
+                    HandleReceivedMessage(receivedData.Buffer);
+                }
+            });
         }
 
-        public void SetLostPacketIds(List<uint> lostPacketIds)
+        private void HandleReceivedMessage(byte[] data)
         {
-            _idLostPackets = lostPacketIds;
-            IdentifyLostPackets();
+            string message = UdpDataConverter.BytesToString(data);
+
+            if (message.StartsWith(UdpProtocolConstant.LostPacketsId))
+                HandlerLostPacket(message);
         }
 
-        private void IdentifyLostPackets()
+        private void HandlerLostPacket(string message)
         {
-            _lostPackets.Clear();
+            string lostPacketsMessage = UdpDataConverter.RemovePrefix(message, UdpProtocolConstant.LostPacketsId);
+            List<uint> lostPackets = UdpDataConverter.ParseLostIPackets(lostPacketsMessage);
 
-            foreach (var packet in _client.SentPackets)
-                if (_idLostPackets.Contains(packet.PacketId))
-                    _lostPackets.Add(packet);
+            Console.WriteLine("Получен список потерянных пакетов: " + string.Join(", ", lostPackets)); // TODO Убрать после отладки
         }
-
     }
 }

@@ -4,6 +4,8 @@ namespace UdpProgram.Udp
 {
     internal class PacketChecker
     {
+        // TODO It is possible to leave only the logic for checking losses, without tracking their state.
+        // TODO It may be worth moving the state check to ServerPacketLossHandler.
         private int PacketTimeoutMilliseconds;
 
         private ConcurrentDictionary<uint, DateTime> _expectedPackets;
