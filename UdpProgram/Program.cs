@@ -1,5 +1,5 @@
 ﻿
-using UdpProgram.Udp;
+using UdpProgram.UDPServer;
 /*
 await Task.Run(async () =>
 {
@@ -35,7 +35,7 @@ await Task.Run(async () =>
     string remoteIp = "192.168.1.104";
     int port = 4004;
 
-    UDPServer server = new UDPServer(localIp, port, remoteIp);
+    Server server = new Server(remoteIp, port);
 
     await server.StartReceivingAsync();
 });

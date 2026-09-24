@@ -1,5 +1,4 @@
 ﻿using System.Net.Sockets;
-using System.Text;
 using UdpProgram.Protocol;
 using UdpProgram.Udp;
 

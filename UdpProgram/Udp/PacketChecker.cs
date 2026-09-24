@@ -42,7 +42,9 @@ namespace UdpProgram.Udp
         private void CheckForLostPackets(object state)
         {
             DateTime now = DateTime.UtcNow;
-            foreach (var kvp in _expectedPackets.ToList())
+
+            var snapshot = _expectedPackets.ToArray();
+            foreach (var kvp in snapshot)
             {
                 if (CheckExistenceWaitExpectPacket(now, kvp.Value))
                 {
