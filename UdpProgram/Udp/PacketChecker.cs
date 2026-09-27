@@ -1,91 +1,73 @@
-﻿using System.Collections.Concurrent;
-
-namespace UdpProgram.Udp
+﻿namespace UdpProgram.Udp
 {
     internal class PacketChecker
     {
-        // TODO It is possible to leave only the logic for checking losses, without tracking their state.
-        // TODO It may be worth moving the state check to ServerPacketLossHandler.
-        private int PacketTimeoutMilliseconds;
+        public event Action<uint> OnGapDetected;
+        public event Action<uint> OnGapFilled;
 
-        private ConcurrentDictionary<uint, DateTime> _expectedPackets;
-        private uint _nextExpectedPacketId;
-        private List<uint> _lostPackets;
-        private Timer _timer;
+        private readonly object _lock = new();
+        private const uint WindowSize = 512;
 
+        private HashSet<uint> _lostPackets;
+        private uint _lastPacketId;
 
-        public PacketChecker(int packetTimeoutMilliseconds = 50)
+        public PacketChecker()
         {
-            PacketTimeoutMilliseconds = packetTimeoutMilliseconds;
-
-            _nextExpectedPacketId = 1;
-            _expectedPackets = new ConcurrentDictionary<uint, DateTime>();
-            _lostPackets = new List<uint>();
-
-            _timer = new Timer(CheckForLostPackets, null, PacketTimeoutMilliseconds, PacketTimeoutMilliseconds);
+            _lostPackets = new HashSet<uint>();
+            _lastPacketId = uint.MaxValue;
         }
 
 
-        // TODO сделать второй список ожидаемых пакетов
-        public List<uint> GetIdLostPackets()
+        public void Record(uint packetId)
         {
-            List<uint> copyLostPackets = new List<uint>(_lostPackets);
-            //List<uint> copyLostPackets = _lostPackets.ToList(); TODO протестировать
-            _lostPackets.Clear();
-            return copyLostPackets;
+            lock (_lock)
+                UpdateState(packetId);
         }
 
-        public void AddPacketId(uint packetId)
+        private void UpdateState(uint packetId)
         {
-            RemovePacketFromWaiting(packetId);
-            ProcessIncomingPacketId(packetId);
-        }
-
-        private void CheckForLostPackets(object state)
-        {
-            DateTime now = DateTime.UtcNow;
-
-            var snapshot = _expectedPackets.ToArray();
-            foreach (var kvp in snapshot)
+            if (_lostPackets.Contains(packetId))
             {
-                if (CheckExistenceWaitExpectPacket(now, kvp.Value))
-                {
-                    RemovePacketFromWaiting(kvp.Key);
-                    _lostPackets.Add(kvp.Key);
-                }
+                _lostPackets.Remove(packetId);
+                OnGapFilled?.Invoke(packetId);
+            }
+
+            else if (IsNextExpected(packetId))
+            {
+                _lastPacketId = packetId;
+                TrimOldGaps();
+            }
+
+            else if (IsPacketIdBigger(packetId))
+            {
+                FillMissingRange(packetId);
+                _lastPacketId = packetId;
+                TrimOldGaps();
             }
         }
 
-        private void RemovePacketFromWaiting(uint packetId) =>
-            _expectedPackets.TryRemove(packetId, out _);
-
-        private void ProcessIncomingPacketId(uint packetId)
+        private void FillMissingRange(uint packetId)
         {
-            if (IsNextExpected(packetId))
-                _nextExpectedPacketId++;
-            else if (IsPacketIdBigger(packetId))
-                HandlerPacketIdBigger(packetId);
+            for (uint i = _lastPacketId + 1; i < packetId; i++)
+            {
+                _lostPackets.Add(i);
+                OnGapDetected?.Invoke(i);
+            }
+        }
+
+        private void TrimOldGaps()
+        {
+            if (_lastPacketId < WindowSize)
+                return;
+
+            uint cutoff = _lastPacketId - WindowSize;
+            _lostPackets.RemoveWhere(id => id < cutoff);
         }
 
         private bool IsNextExpected(uint packetId) =>
-            packetId == _nextExpectedPacketId;
+            packetId == _lastPacketId + 1;
 
         private bool IsPacketIdBigger(uint packetId) =>
-            packetId > _nextExpectedPacketId;
-
-        private void HandlerPacketIdBigger(uint packetId)
-        {
-            RecordExpectedPackets(packetId);
-            _nextExpectedPacketId = packetId + 1;
-        }
-
-        private void RecordExpectedPackets(uint packetId)
-        {
-            for (uint i = _nextExpectedPacketId; i < packetId; i++)
-                _expectedPackets[i] = DateTime.UtcNow;
-        }
-
-        private bool CheckExistenceWaitExpectPacket(DateTime now, DateTime packetDateTime) =>
-            (now - packetDateTime).TotalMilliseconds > PacketTimeoutMilliseconds;
+            packetId > _lastPacketId + 1;
     }
 }

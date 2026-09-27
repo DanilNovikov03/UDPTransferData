@@ -23,7 +23,7 @@ namespace UdpProgram.UDPServer
             {
                 Console.WriteLine($"Начало приёма"); // TODO убрать после отладки
                 UdpPacket packet = await ReceivePacket();
-                //_packetChecker.AddPacketId(packet.PacketId);
+                _packetChecker.Record(packet.PacketId);
 
                 Console.WriteLine($"Пришел пакет {packet.PacketId}"); // TODO убрать после отладки
             }
