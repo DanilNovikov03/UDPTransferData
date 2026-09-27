@@ -7,4 +7,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Abstraction\Infrastructure\" />
+    <Folder Include="Abstraction\HandlerLoss\" />
+    <Folder Include="UDPClient\Interface\" />
+  </ItemGroup>
+
 </Project>

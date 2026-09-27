@@ -1,29 +1,29 @@
-﻿using System.Net.Sockets;
-using UdpProgram.Udp;
+﻿using UdpProgram.Abstraction.Transport;
 using UdpProgram.Protocol;
+using UdpProgram.Udp;
 
 namespace UdpProgram.UDPServer
 {
     // пока данный класс не обрабатывает сами данные. Потом будет добавлен циклический буффер.
     public class Server
     {
-        private UdpClient _receiver;
+        private ITransport _transportReceive;
         private PacketChecker _packetChecker;
-        private ServerPacketLossHandler _lostPacketHandler;
 
-        public Server(string clientIpAddres, int port)
+        public Server(ITransport transportReceive)
         {
-            _receiver = new UdpClient(port);
+            _transportReceive = transportReceive;
             _packetChecker = new PacketChecker();
-            _lostPacketHandler = new ServerPacketLossHandler(clientIpAddres, port + 1, _packetChecker); // TODO сделать получение ip клиента отдельной процедурой
         }
+
 
         public async Task StartReceivingAsync()
         {
             while (true)
             {
+                Console.WriteLine($"Начало приёма"); // TODO убрать после отладки
                 UdpPacket packet = await ReceivePacket();
-                _packetChecker.AddPacketId(packet.PacketId);
+                //_packetChecker.AddPacketId(packet.PacketId);
 
                 Console.WriteLine($"Пришел пакет {packet.PacketId}"); // TODO убрать после отладки
             }
@@ -31,10 +31,8 @@ namespace UdpProgram.UDPServer
 
         private async Task<UdpPacket> ReceivePacket()
         {
-            var receivedData = await _receiver.ReceiveAsync();
-            byte[] receiveBytes = receivedData.Buffer;
-
-            UdpPacket packet = UdpDataConverter.FromBytesToPacket(receiveBytes);
+            byte[] receivedData = await _transportReceive.ReceiveAsync();
+            UdpPacket packet = UdpDataConverter.FromBytesToPacket(receivedData);
 
             return packet;
         }

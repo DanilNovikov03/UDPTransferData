@@ -1,4 +1,4 @@
-﻿using System.Net.Sockets;
+﻿using UdpProgram.Abstraction.Transport;
 using UdpProgram.Protocol;
 
 
@@ -6,11 +6,11 @@ namespace UdpProgram.UDPClient
 {
     internal class ClientPacketLossHandler
     {
-        private UdpClient _receiverCommand;
+        private ITransport _transport;
 
-        public ClientPacketLossHandler(int clientPort)
+        public ClientPacketLossHandler(ITransport transport)
         {
-            _receiverCommand = new UdpClient(clientPort);
+            _transport = transport;
             StartListening();
         }
 
@@ -20,10 +20,9 @@ namespace UdpProgram.UDPClient
         {
             Task.Run(async () =>
             {
-                while (true)
                 {
-                    var receivedData = await _receiverCommand.ReceiveAsync();
-                    HandleReceivedMessage(receivedData.Buffer);
+                    byte[] receivedData = await _transport.ReceiveAsync();
+                    HandleReceivedMessage(receivedData);
                 }
             });
         }

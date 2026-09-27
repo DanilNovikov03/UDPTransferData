@@ -1,31 +1,34 @@
-﻿using System.Net.Sockets;
+﻿using UdpProgram.Abstraction.Transport;
 using UdpProgram.Protocol;
 using UdpProgram.Udp;
-using UdpProgram.UDPClient;
 
 
-public class Client
+namespace UdpProgram.UDPClient
 {
-    private UdpClient _sender;
-    private ClientPacketLossHandler _lostPacketHandler;
-
-    public Client(string serverIpAddress, int serverPort)
+    public class Client
     {
-        _sender = new UdpClient(serverIpAddress, serverPort);
-        _lostPacketHandler = new ClientPacketLossHandler(serverPort + 1);
-    }
+        private ITransport _transportSend;
+        //private ClientPacketLossHandler _lostPacketHandler;
 
-    // TODO test, after delete
-    public async Task SendAsync(byte[] data)
-    {
-        var packet = UdpDataConverter.FromBytesToPacket(data);
-        await _sender.SendAsync(data, data.Length);
-    }
+        public Client(ITransport transportSend)
+        {
+            _transportSend = transportSend;
+            //_lostPacketHandler = new ClientPacketLossHandler(transport);
+        }
 
-    //  A ready packet arrives in the class from the circular buffer
-    public async Task SendPacketAsync(UdpPacket packet)
-    {
-        byte[] packetBytes = UdpDataConverter.ToBytesPacket(packet);
-        await _sender.SendAsync(packetBytes, packetBytes.Length);
+        // TODO test, after delete
+        public async Task SendAsync(byte[] data)
+        {
+            var packet = UdpDataConverter.FromBytesToPacket(data);
+            await _transportSend.SendAsync(data);
+        }
+
+        //  A ready packet arrives in the class from the circular buffer
+        public async Task SendPacketAsync(UdpPacket packet)
+        {
+            byte[] packetBytes = UdpDataConverter.ToBytesPacket(packet);
+            Console.WriteLine($"Отправлен Пакет {packet.PacketId}");
+            await _transportSend.SendAsync(packetBytes);
+        }
     }
 }

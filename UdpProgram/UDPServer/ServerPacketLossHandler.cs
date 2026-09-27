@@ -1,4 +1,4 @@
-﻿using System.Net.Sockets;
+﻿using UdpProgram.Abstraction.Transport;
 using UdpProgram.Protocol;
 using UdpProgram.Udp;
 
@@ -7,13 +7,13 @@ namespace UdpProgram.UDPServer
     internal class ServerPacketLossHandler
     {
         // TODO Create an interface for interacting with the circular buffer.
-        private UdpClient _sender;
+        private ITransport _transport;
         private PacketChecker _packetChecker;
         private Timer _timer;
 
-        public ServerPacketLossHandler(string clientIpAddres, int clientPort, PacketChecker checker, int timeSendLostPacketIds = 100)
+        public ServerPacketLossHandler(ITransport transport, PacketChecker checker, int timeSendLostPacketIds = 100)
         {
-            _sender = new UdpClient(clientIpAddres, clientPort);
+            _transport = transport;
             _packetChecker = checker;
 
             _timer = new Timer(SendLostIdPackets, null, timeSendLostPacketIds, timeSendLostPacketIds);
@@ -29,7 +29,7 @@ namespace UdpProgram.UDPServer
                 string message = string.Join(", ", lostPackets);
                 Console.WriteLine("Отправлен список потерянных пакетов: " + message); // TODO убрать после отладки
 
-                await _sender.SendAsync(data, data.Length);
+                await _transport.SendAsync(data);
             }
         }
 
