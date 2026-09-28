@@ -6,25 +6,45 @@ namespace UdpProgram.UDPClient
 {
     internal class ClientPacketLossHandler
     {
-        private ITransport _transport;
+        // TODO create an interface for the circular buffer
+        // TODO implement resending
+        private readonly ITransport _transport;
+        private readonly CancellationTokenSource _cts = new();
+        private Task? _listenTask;
 
-        public ClientPacketLossHandler(ITransport transport)
+        public ClientPacketLossHandler(ITransport transportReceive) =>
+            _transport = transportReceive;
+
+
+        public void Start()
         {
-            _transport = transport;
-            StartListening();
+            if (_listenTask != null) return;
+            _listenTask = ListenAsync(_cts.Token);
+        }
+
+        public void Stop()
+        {
+            _cts.Cancel();
+            try { _listenTask?.Wait(); } catch { /* Ignored */ }
         }
 
 
-        // TODO Think about how to do it in a separate thread
-        private void StartListening()
+        private async Task ListenAsync(CancellationToken ct)
         {
-            Task.Run(async () =>
+            while (!ct.IsCancellationRequested) // test
             {
+                try
                 {
                     byte[] receivedData = await _transport.ReceiveAsync();
                     HandleReceivedMessage(receivedData);
                 }
-            });
+                catch (OperationCanceledException)
+                    { break; }
+                catch (ObjectDisposedException)
+                    { break; }
+                catch (Exception ex)
+                    { Console.WriteLine($"Ошибка ClientHandler : {ex.Message}"); }
+            }
         }
 
         private void HandleReceivedMessage(byte[] data)

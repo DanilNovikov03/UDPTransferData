@@ -10,18 +10,26 @@ namespace UdpProgram.UDPServer
         private ITransport _transportReceive;
         private PacketChecker _packetChecker;
 
-        public Server(ITransport transportReceive)
+        private ITransport _transportSend;
+        private ServerPacketLossHandler _handlerLoss;
+
+        // TODO Make it more convenient with transportSend so that it doesn’t need to be passed separately to the constructor
+        public Server(ITransport transportReceive, ITransport transportSend)
         {
             _transportReceive = transportReceive;
             _packetChecker = new PacketChecker();
+            _transportSend = transportSend;
+
+            _handlerLoss = new ServerPacketLossHandler(_transportSend, _packetChecker);
         }
 
 
         public async Task StartReceivingAsync()
         {
+            Console.WriteLine($"Начало приёма"); // TODO убрать после отладки
+            _handlerLoss.Start();
             while (true)
             {
-                Console.WriteLine($"Начало приёма"); // TODO убрать после отладки
                 UdpPacket packet = await ReceivePacket();
                 _packetChecker.Record(packet.PacketId);
 

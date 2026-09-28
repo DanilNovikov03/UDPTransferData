@@ -8,12 +8,15 @@ namespace UdpProgram.UDPClient
     public class Client
     {
         private ITransport _transportSend;
-        //private ClientPacketLossHandler _lostPacketHandler;
+        private ITransport _transportReceive;
+        private ClientPacketLossHandler _lostPacketHandler;
 
-        public Client(ITransport transportSend)
+        public Client(ITransport transportSend, ITransport transportReceive)
         {
             _transportSend = transportSend;
-            //_lostPacketHandler = new ClientPacketLossHandler(transport);
+            _transportReceive = transportReceive;
+
+            _lostPacketHandler = new ClientPacketLossHandler(transportReceive);
         }
 
         // TODO test, after delete
@@ -27,8 +30,11 @@ namespace UdpProgram.UDPClient
         public async Task SendPacketAsync(UdpPacket packet)
         {
             byte[] packetBytes = UdpDataConverter.ToBytesPacket(packet);
-            Console.WriteLine($"Отправлен Пакет {packet.PacketId}");
+            //Console.WriteLine($"Отправлен Пакет {packet.PacketId}");
             await _transportSend.SendAsync(packetBytes);
         }
+
+        public void StartHandlerLost() =>
+            _lostPacketHandler.Start();
     }
 }

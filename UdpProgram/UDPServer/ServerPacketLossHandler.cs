@@ -7,6 +7,7 @@ namespace UdpProgram.UDPServer
 {
     internal class ServerPacketLossHandler
     {
+        // TODO Make sure the sockets are closed properly.
         // TODO create a counter for repeated requests
         private ITransport _transport;
 
@@ -17,9 +18,9 @@ namespace UdpProgram.UDPServer
 
         private Timer _timer;
 
-        public ServerPacketLossHandler(ITransport transport, PacketChecker packetChecker, int timeSendLostPacketIds = 100)
+        public ServerPacketLossHandler(ITransport transportSend, PacketChecker packetChecker, int timeSendLostPacketIds = 100)
         {
-            _transport = transport;
+            _transport = transportSend;
 
             _expectedPackets = new ConcurrentDictionary<uint, DateTime>();
             _timeSendLostPacketIds = timeSendLostPacketIds;
@@ -27,20 +28,22 @@ namespace UdpProgram.UDPServer
             _packetChecker = packetChecker;
             _packetChecker.OnGapDetected += HandleGapDetected;
             _packetChecker.OnGapFilled += HandleGapFilled;
-
-            _timer = new Timer(SendLostIdPackets, null, timeSendLostPacketIds, timeSendLostPacketIds);
         }
 
-
-        private void HandleGapDetected(uint packetId)
+        public void Start()
         {
+            if (_timer != null) return;
+            _timer = new Timer(SendLostIdPackets, null, _timeSendLostPacketIds, _timeSendLostPacketIds);
+        }
+
+        public void Stop() =>
+            _timer?.Change(Timeout.Infinite, Timeout.Infinite);
+
+        private void HandleGapDetected(uint packetId) =>
             _expectedPackets.TryAdd(packetId, DateTime.UtcNow);
-        }
 
-        private void HandleGapFilled(uint packetId)
-        {
+        private void HandleGapFilled(uint packetId) =>
             _expectedPackets.TryRemove(packetId, out _);
-        }
 
         private async void SendLostIdPackets(object state)
         {
