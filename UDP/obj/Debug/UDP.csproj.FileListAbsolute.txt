@@ -1,2 +1,0 @@
-G:\DanilN\UdpTransferDataApp\UDP\obj\Debug\UDP.csproj.AssemblyReference.cache
-G:\DanilN\UdpTransferDataApp\UDP\obj\Debug\UDP.csproj.CoreCompileInputs.cache
