@@ -8,9 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Abstraction\Infrastructure\" />
-    <Folder Include="Abstraction\HandlerLoss\" />
     <Folder Include="UDPClient\Interface\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CircularBuffer\CircularBuffer.csproj" />
   </ItemGroup>
 
 </Project>
