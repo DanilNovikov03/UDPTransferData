@@ -5,26 +5,42 @@
         private static readonly int MaxSizeDataPacket = 65503;
 
 
-        public static List<UdpPacket> SeparationDataToPacket(byte[] data)
+        public static List<UdpPacket> SplitIntoPackets(byte[] data)
+        {
+            int totalPackets = GetPacketCount(data);
+            return SeparationDataToPackets(data, totalPackets);
+        }
+
+        private static int GetPacketCount(byte[] data) =>
+            (int)Math.Ceiling((double)data.Length / MaxSizeDataPacket);
+
+        private static List<UdpPacket> SeparationDataToPackets(byte[] data, int countPackets)
         {
             List<UdpPacket> packets = new List<UdpPacket>();
-            int totalPackets = (int)Math.Ceiling((double)data.Length / MaxSizeDataPacket);
 
-            for (int i = 0; i < totalPackets; i++)
+            for (int packetId = 0; packetId < countPackets; packetId++)
             {
-                int startIndex = i * MaxSizeDataPacket;
-                int packetSize = Math.Min(MaxSizeDataPacket, data.Length - startIndex);
+                int dataOffset = packetId * MaxSizeDataPacket;
+                int packetSize = GetPacketSize(data.Length, dataOffset);
 
                 if (packetSize > 0)
                 {
-                    byte[] packetData = new byte[packetSize];
-                    Buffer.BlockCopy(data, startIndex, packetData, 0, packetSize);
-                    UdpPacket packetDataUdp = new UdpPacket((uint)i, packetData);
-
+                    UdpPacket packetDataUdp = BuildPacket(data, dataOffset, packetSize, (uint)packetId);
                     packets.Add(packetDataUdp);
                 }
             }
+
             return packets;
+        }
+
+        private static int GetPacketSize(int dataLength, int dataOffset) =>
+            Math.Min(MaxSizeDataPacket, dataLength - dataOffset);
+
+        private static UdpPacket BuildPacket(byte[] data, int dataOffset, int packetSize, uint packetId)
+        {
+            byte[] packetData = new byte[packetSize];
+            Buffer.BlockCopy(data, dataOffset, packetData, 0, packetSize);
+            return new UdpPacket(packetId, packetData);
         }
     }
 }

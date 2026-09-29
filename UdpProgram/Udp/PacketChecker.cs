@@ -1,121 +1,73 @@
 ﻿namespace UdpProgram.Udp
 {
-    public class PacketChecker
+    internal class PacketChecker
     {
-        private readonly object lockObject = new object();
-        private HashSet<uint> ReceivedPacketIds;
-        private List<uint> MissingPacketIds;
-        private uint? ExpectedPacketCount;
-        private uint MaxReceivedPacketId;
+        public event Action<uint> OnGapDetected;
+        public event Action<uint> OnGapFilled;
 
-        public PacketChecker(uint? expectedPacketCount = null)
+        private readonly object _lock = new();
+        private const uint WindowSize = 512;
+
+        private HashSet<uint> _lostPackets;
+        private uint _lastPacketId;
+
+        public PacketChecker()
         {
-            ReceivedPacketIds = new HashSet<uint>();
-            MissingPacketIds = new List<uint>();
-            ExpectedPacketCount = expectedPacketCount;
-            MaxReceivedPacketId = 0;
+            _lostPackets = new HashSet<uint>();
+            _lastPacketId = uint.MaxValue;
         }
 
-        public void SetExpectedPacketCount(uint expectedPacketCount)
+
+        public void Record(uint packetId)
         {
-            lock (lockObject)
-                ExpectedPacketCount = expectedPacketCount;
+            lock (_lock)
+                UpdateState(packetId);
         }
 
-        public void ResetExpectedPacketCount()
+        private void UpdateState(uint packetId)
         {
-            lock (lockObject)
-                ExpectedPacketCount = null;
-        }
-
-        public bool HasLostPackets()
-        {
-            lock (lockObject)
-                return MissingPacketIds.Count > 0;
-        }
-
-        public List<uint> GetMissingPacketIds()
-        {
-            lock (lockObject)
-                return new List<uint>(MissingPacketIds);
-        }
-
-        public void AddMissingPackets(IEnumerable<uint> missingPackets)
-        {
-            lock (lockObject)
+            if (_lostPackets.Contains(packetId))
             {
-                var newMissingPackets = missingPackets.Except(MissingPacketIds).ToList();
-                MissingPacketIds.AddRange(newMissingPackets);
+                _lostPackets.Remove(packetId);
+                OnGapFilled?.Invoke(packetId);
+            }
+
+            else if (IsNextExpected(packetId))
+            {
+                _lastPacketId = packetId;
+                TrimOldGaps();
+            }
+
+            else if (IsPacketIdBigger(packetId))
+            {
+                FillMissingRange(packetId);
+                _lastPacketId = packetId;
+                TrimOldGaps();
             }
         }
 
-        public bool AddReceivedPacketId(uint packetId)
+        private void FillMissingRange(uint packetId)
         {
-            if (!ExpectedPacketCount.HasValue)
-                return false;
-
-            lock (lockObject)
+            for (uint i = _lastPacketId + 1; i < packetId; i++)
             {
-                ReceivedPacketIds.Add(packetId);
-                CheckMissingPacketId(packetId);
-            }
-            return true;
-        }
-
-        public bool HaveAllPackages()
-        {
-            if (!ExpectedPacketCount.HasValue)
-                throw new InvalidOperationException("ExpectedPacketCount is not set.");
-
-            lock (lockObject)
-                return (ReceivedPacketIds.Count == ExpectedPacketCount) && !HasLostPackets();
-        }
-
-        public List<uint> FullGetMissingPacketIds()
-        {
-            if (!ExpectedPacketCount.HasValue)
-                throw new InvalidOperationException("ExpectedPacketCount is not set.");
-
-            List<uint> missingPacketsId = new List<uint>();
-
-            lock (lockObject)
-            {
-                for (uint i = 0; i < ExpectedPacketCount; i++)
-                    if (!ReceivedPacketIds.Contains(i))
-                        missingPacketsId.Add(i);
-            }
-
-            return missingPacketsId;
-        }
-
-        public void Reset()
-        {
-            lock (lockObject)
-            {
-                ReceivedPacketIds.Clear();
-                MissingPacketIds.Clear();
-                ExpectedPacketCount = null;
-                MaxReceivedPacketId = 0;
+                _lostPackets.Add(i);
+                OnGapDetected?.Invoke(i);
             }
         }
 
-        private void CheckMissingPacketId(uint packetId)
+        private void TrimOldGaps()
         {
-            lock (lockObject)
-            {
-                for (uint i = MaxReceivedPacketId; i < packetId; i++)
-                    if (!ReceivedPacketIds.Contains(i) && !MissingPacketIds.Contains(i))
-                        MissingPacketIds.Add(i);
+            if (_lastPacketId < WindowSize)
+                return;
 
-                if (packetId < MaxReceivedPacketId && !ReceivedPacketIds.Contains(packetId))
-                {
-                    ReceivedPacketIds.Add(packetId);
-                    MissingPacketIds.Remove(packetId);
-                }
-
-                MaxReceivedPacketId = packetId > MaxReceivedPacketId ? packetId : MaxReceivedPacketId;
-                MissingPacketIds.Remove(packetId);
-            }
+            uint cutoff = _lastPacketId - WindowSize;
+            _lostPackets.RemoveWhere(id => id < cutoff);
         }
+
+        private bool IsNextExpected(uint packetId) =>
+            packetId == _lastPacketId + 1;
+
+        private bool IsPacketIdBigger(uint packetId) =>
+            packetId > _lastPacketId + 1;
     }
 }
