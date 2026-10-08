@@ -11,8 +11,4 @@
     <Folder Include="UDPClient\Interface\" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\CircularBuffer\CircularBuffer.csproj" />
-  </ItemGroup>
-
 </Project>

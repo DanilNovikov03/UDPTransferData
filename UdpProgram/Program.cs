@@ -6,9 +6,9 @@ using UdpProgram.Transport;
 using UdpProgram.Udp;
 using UdpProgram.UDPClient;
 using UdpProgram.UDPServer;
-using CircularBuffer.CircularBuffer;
+using UdpProgram.CircularBuffer;
 
-
+/*
 string localIp = "192.168.1.100";
 string remoteIp = "192.168.1.103";
 int port = 4004;
@@ -33,7 +33,7 @@ for (uint i =  0; i < uint.MaxValue; i++)
     if (i % 100 == 0)
         await Task.Delay(1000); // Добавляем задержку перед следующей передачей данных
 }
-
+*/
 
 static byte[] GenerateRandomData()
 {
@@ -44,6 +44,15 @@ static byte[] GenerateRandomData()
     byte[] data = new byte[dataSize];
     random.NextBytes(data);
     return data;
+}
+
+static List<UdpPacket> GetUdpPackets(PacketCircucleBuffer buffer, int sizeBuffer)
+{
+    List<UdpPacket> packets = new List<UdpPacket>();
+    for (int i = 0; i < sizeBuffer; i++)
+        packets.Add(buffer[i]);
+
+    return packets;
 }
 
 /*
@@ -64,3 +73,29 @@ Server server = new Server(transportReceive, transportSend);
 await server.StartReceivingAsync();
 
 */
+
+int sizeBuffer = 5;
+int countPackets = 10;
+PacketCircucleBuffer buffer = new PacketCircucleBuffer(sizeBuffer);
+
+List<UdpPacket> packets = new List<UdpPacket>();
+for (int i = 0; i < countPackets; i++)
+{
+    UdpPacket packet = new UdpPacket((uint)i, GenerateRandomData());
+    packets.Add(packet);
+}
+
+buffer.Add(packets[0]);
+buffer.Add(packets[1]);
+buffer.Add(packets[2]);
+buffer.Add(packets[3]);
+buffer.Add(packets[4]);
+//buffer.Add(packets[5]);
+//buffer.Add(packets[6]);
+//buffer.Add(packets[7]);
+var results = GetUdpPackets(buffer, sizeBuffer);
+
+for (int y = 0; y < sizeBuffer; y++)
+    Console.WriteLine(buffer[y].PacketId.ToString() + " ");
+
+

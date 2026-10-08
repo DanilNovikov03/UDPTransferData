@@ -12,7 +12,7 @@ namespace CircularBuffer.CircularBuffer
         public int Capacity => _buffer.Length;
         public bool IsFull => Count == Capacity;
         public bool IsEmpty => Count == 0;
-        public int Count { get; private set; }
+        public int Count { get; protected set; }
 
         public MyCircularBuffer(int capacity)
             : this(capacity, Array.Empty<T>()) { }
@@ -40,6 +40,7 @@ namespace CircularBuffer.CircularBuffer
             get => _buffer[InternalIndex(index)];
             set => _buffer[InternalIndex(index)] = value;
         }
+
 
         public virtual int IndexOf(T item)
         {

@@ -7,5 +7,6 @@
         public const string LostPacketsId = "LOST_PACKETS";
 
         public const int SizeIdPacket = 4;
+        public const int PacketSize = 65000;
     }
 }
