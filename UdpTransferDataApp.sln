@@ -11,8 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UdpServer", "UdpServer\UdpS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UdpProgramStatistic", "UdpProgramStatistic\UdpProgramStatistic.csproj", "{E6043D0E-68B9-41B8-B95D-0C302C72A930}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CircularBuffer", "CircularBuffer\CircularBuffer.csproj", "{ED243312-EB86-4BF9-9EC6-5F826C8EC370}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UdpProgram.Tests", "UdpProgram.Tests\UdpProgram.Tests.csproj", "{D20FBF98-C79A-4BEC-A96A-37A88657C80D}"
 EndProject
 Global
@@ -37,10 +35,6 @@ Global
 		{E6043D0E-68B9-41B8-B95D-0C302C72A930}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E6043D0E-68B9-41B8-B95D-0C302C72A930}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E6043D0E-68B9-41B8-B95D-0C302C72A930}.Release|Any CPU.Build.0 = Release|Any CPU
-		{ED243312-EB86-4BF9-9EC6-5F826C8EC370}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ED243312-EB86-4BF9-9EC6-5F826C8EC370}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ED243312-EB86-4BF9-9EC6-5F826C8EC370}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ED243312-EB86-4BF9-9EC6-5F826C8EC370}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D20FBF98-C79A-4BEC-A96A-37A88657C80D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D20FBF98-C79A-4BEC-A96A-37A88657C80D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D20FBF98-C79A-4BEC-A96A-37A88657C80D}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -140,6 +140,33 @@ namespace UdpProgram.Tests.CircularBuffer
             Assert.Equal(Ids, resultIds);
         }
 
+        [Fact]
+        public void Add_WhenWindowShiftsOnOverflow_BufferHandlesMissingPacketsAndMaintainsOrder()
+        {
+            // arrange
+            int sizeBuffer = 5;
+            int countPackets = 10;
+            PacketCircucleBuffer buffer = new PacketCircucleBuffer(sizeBuffer);
+
+            List<UdpPacket> packets = CreateListUdpPackets(countPackets);
+
+            // act
+            buffer.Add(packets[0]);
+            buffer.Add(packets[2]);
+            buffer.Add(packets[4]);
+            buffer.Add(packets[1]);
+            buffer.Add(packets[5]);
+            buffer.Add(packets[7]);
+
+            var result = GetUdpPackets(buffer, sizeBuffer);
+
+            //assert
+            uint[] Ids = { 0, 4, 5, 0, 7 };
+            var resultIds = result.Select(p => p.PacketId).ToArray();
+
+            Assert.Equal(Ids, resultIds);
+        }
+
         private List<UdpPacket> GetUdpPackets(PacketCircucleBuffer buffer, int sizeBuffer)
         {
             List<UdpPacket> packets = new List<UdpPacket>(sizeBuffer);

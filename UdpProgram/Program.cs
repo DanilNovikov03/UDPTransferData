@@ -86,13 +86,12 @@ for (int i = 0; i < countPackets; i++)
 }
 
 buffer.Add(packets[0]);
-buffer.Add(packets[1]);
 buffer.Add(packets[2]);
-buffer.Add(packets[3]);
 buffer.Add(packets[4]);
-//buffer.Add(packets[5]);
-//buffer.Add(packets[6]);
-//buffer.Add(packets[7]);
+buffer.Add(packets[1]);
+buffer.Add(packets[5]);
+buffer.Add(packets[7]);
+
 var results = GetUdpPackets(buffer, sizeBuffer);
 
 for (int y = 0; y < sizeBuffer; y++)
