@@ -495,3 +495,5 @@ x64/
 .agents
 .vs/
 *.obj
+
+ProjectContext
