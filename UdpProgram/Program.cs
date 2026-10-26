@@ -55,6 +55,15 @@ static List<UdpPacket> GetUdpPackets(PacketCircucleBuffer buffer, int sizeBuffer
     return packets;
 }
 
+static List<UdpPacket> GetUdpPackets2(MyCircularBuffer<UdpPacket> buffer, int sizeBuffer)
+{
+    List<UdpPacket> packets = new List<UdpPacket>();
+    for (int i = 0; i < sizeBuffer; i++)
+        packets.Add(buffer[i]);
+
+    return packets;
+}
+
 /*
 // TODO Perhaps it would be worth handling the socket closure via IDisposible and "using"
 
@@ -77,6 +86,7 @@ await server.StartReceivingAsync();
 int sizeBuffer = 5;
 int countPackets = 10;
 PacketCircucleBuffer buffer = new PacketCircucleBuffer(sizeBuffer);
+//MyCircularBuffer<UdpPacket> buffer = new MyCircularBuffer<UdpPacket>(sizeBuffer);
 
 List<UdpPacket> packets = new List<UdpPacket>();
 for (int i = 0; i < countPackets; i++)
@@ -86,14 +96,17 @@ for (int i = 0; i < countPackets; i++)
 }
 
 buffer.Add(packets[0]);
+//buffer.Add(packets[1]);
+buffer.Add(packets[2]);
 buffer.Add(packets[2]);
 buffer.Add(packets[4]);
+buffer.Add(packets[4]);
 buffer.Add(packets[1]);
-buffer.Add(packets[5]);
-buffer.Add(packets[7]);
+
 
 var results = GetUdpPackets(buffer, sizeBuffer);
 
+Console.WriteLine("\n================");
 for (int y = 0; y < sizeBuffer; y++)
     Console.WriteLine(buffer[y].PacketId.ToString() + " ");
 
