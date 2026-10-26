@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UdpProgram.CircularBuffer;
+﻿using UdpProgram.CircularBuffer;
 using UdpProgram.Udp;
 
 
@@ -167,6 +162,95 @@ namespace UdpProgram.Tests.CircularBuffer
             Assert.Equal(Ids, resultIds);
         }
 
+        [Fact]
+        public void Add_WithGapsAndLargeJump_ShouldPreserveOrder()
+        {
+            // arrange
+            int sizeBuffer = 5;
+            int countPackets = 10;
+            PacketCircucleBuffer buffer = new PacketCircucleBuffer(sizeBuffer);
+
+            List<UdpPacket> packets = CreateListUdpPackets(countPackets);
+
+            // act
+            buffer.Add(packets[0]);
+            buffer.Add(packets[2]);
+            buffer.Add(packets[4]);
+            buffer.Add(packets[1]);
+            buffer.Add(packets[5]);
+            buffer.Add(packets[9]);
+
+            var result = GetUdpPackets(buffer, sizeBuffer);
+
+            //assert
+            uint[] Ids = { 5, 0, 0, 0, 9 };
+            var resultIds = result.Select(p => p.PacketId).ToArray();
+
+            Assert.Equal(Ids, resultIds);
+        }
+
+        [Fact]
+        public void AddDuplicatePackets_BeforeFull_ShouldKeepUniqueOnly()
+        {
+            // arrange
+            int sizeBuffer = 5;
+            int countPackets = 10;
+            PacketCircucleBuffer buffer = new PacketCircucleBuffer(sizeBuffer);
+
+            List<UdpPacket> packets = CreateListUdpPackets(countPackets);
+
+            // act
+            buffer.Add(packets[0]);
+            buffer.Add(packets[0]);
+            buffer.Add(packets[2]);
+            buffer.Add(packets[2]);
+            buffer.Add(packets[4]);
+            buffer.Add(packets[4]);
+            buffer.Add(packets[1]);
+            buffer.Add(packets[1]);
+
+            var result = GetUdpPackets(buffer, sizeBuffer);
+
+            // assert
+            uint[] Ids = { 0, 1, 2, 0, 4 };
+            var resultIds = result.Select(p => p.PacketId).ToArray();
+
+            Assert.Equal(Ids, resultIds);
+        }
+
+        [Fact]
+        public void Add_DuplicatePackets_AfterFull_ShouldNotBreakOrder()
+        {
+            // arrange
+            int sizeBuffer = 5;
+            int countPackets = 10;
+            PacketCircucleBuffer buffer = new PacketCircucleBuffer(sizeBuffer);
+
+            List<UdpPacket> packets = CreateListUdpPackets(countPackets);
+
+            // act
+            buffer.Add(packets[0]);
+            buffer.Add(packets[0]);
+            buffer.Add(packets[2]);
+            buffer.Add(packets[2]);
+            buffer.Add(packets[4]);
+            buffer.Add(packets[4]);
+            buffer.Add(packets[1]);
+            buffer.Add(packets[1]);
+            buffer.Add(packets[5]);
+            buffer.Add(packets[5]);
+            buffer.Add(packets[9]);
+            buffer.Add(packets[9]);
+
+            var result = GetUdpPackets(buffer, sizeBuffer);
+
+            // assert
+            uint[] Ids = { 5, 0, 0, 0, 9 };
+            var resultIds = result.Select(p => p.PacketId).ToArray();
+
+            Assert.Equal(Ids, resultIds);
+        }
+
         private List<UdpPacket> GetUdpPackets(PacketCircucleBuffer buffer, int sizeBuffer)
         {
             List<UdpPacket> packets = new List<UdpPacket>(sizeBuffer);
@@ -175,6 +259,7 @@ namespace UdpProgram.Tests.CircularBuffer
 
             return packets;
         }
+
 
         private List<UdpPacket> CreateListUdpPackets(int countPackets)
         {
