@@ -124,17 +124,15 @@ namespace UdpProgram.CircularBuffer
             Count = newLen;
             _end = InternalIndex(Count);
         }
-   
 
-        // todo можно оптимизировать - сделать вычисление позиции пакета, т.к. знаем все id
         private int IndexOfId(uint packetId)
         {
-            for (int i = 0; i < Capacity; i++)
-            {
-                var p = _buffer[InternalIndex(i)];
-                if (p != null && p.PacketId == packetId)
-                    return i;
-            }
+            int position = (int)(packetId - _firstId);
+            var packet = _buffer[InternalIndex(position)];
+
+            if (packet != null && packet.PacketId == packetId)
+                return position;
+
             return -1;
         }
 
