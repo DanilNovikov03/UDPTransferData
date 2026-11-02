@@ -2,7 +2,7 @@
 
 namespace UdpProgram.CircularBuffer
 {
-    public class PacketCircucleBuffer : MyCircularBuffer<UdpPacket>
+    public class ServerPacketCircuclarBuffer : MyCircularBuffer<UdpPacket>
     {
         // TODO возможен прыжок больше размера буффера
         // todo при добавлении в буффер используется InternalIndex возможно не стоит его каждый раз добавлять
@@ -10,7 +10,7 @@ namespace UdpProgram.CircularBuffer
         private UdpPacket _emptyPacket;
         private uint _firstId;
 
-        public PacketCircucleBuffer(int capacity) : base(capacity)
+        public ServerPacketCircuclarBuffer(int capacity) : base(capacity)
         {
         }
 
@@ -104,6 +104,7 @@ namespace UdpProgram.CircularBuffer
             _firstId++;
         }
 
+        // TODO rafactore code
         private void AddBufferWithWindowShift(int position, UdpPacket packet)
         {
             int newLen = position + 1;           
