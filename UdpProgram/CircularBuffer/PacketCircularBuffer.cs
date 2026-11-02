@@ -32,7 +32,9 @@ namespace UdpProgram.CircularBuffer
         protected override void AddNoFullBuffer(UdpPacket item)
         {
             base.AddNoFullBuffer(item);
-            _firstId = item.PacketId;
+
+            if (IsEmpty)
+                _firstId = item.PacketId;
         }
 
         protected int IndexOfId(uint packetId)
@@ -45,5 +47,8 @@ namespace UdpProgram.CircularBuffer
 
             return -1;
         }
+
+        protected bool IsOldPacket(uint packetId) =>
+            packetId < _firstId;
     }
 }

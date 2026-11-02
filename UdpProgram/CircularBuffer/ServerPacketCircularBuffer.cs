@@ -29,14 +29,11 @@ namespace UdpProgram.CircularBuffer
 
         public override void Add(UdpPacket packet)
         {
-            if (IsOldPacket(packet))
+            if (IsOldPacket(packet.PacketId))
                 return;
 
             AddPacketToBuffer(packet);
         }
-
-        private bool IsOldPacket(UdpPacket packet) =>
-            packet.PacketId < _firstId;
 
         private void AddPacketToBuffer(UdpPacket packet)
         {

@@ -95,7 +95,7 @@ await server.StartReceivingAsync();
 int sizeBuffer = 5;
 int countPackets = 10;
 //ServerPacketCircuclarBuffer buffer = new ServerPacketCircuclarBuffer(sizeBuffer);
-PacketCircularBuffer buffer = new PacketCircularBuffer(sizeBuffer);
+ClientPacketCircularBuffer buffer = new ClientPacketCircularBuffer(sizeBuffer);
 
 List<UdpPacket> packets = new List<UdpPacket>();
 for (int i = 0; i < countPackets; i++)
@@ -114,8 +114,6 @@ buffer.Add(packets[6]);
 buffer.Add(packets[7]);
 buffer.Add(packets[8]);
 buffer.Add(packets[9]);
-
-var results = GetUdpPackets3(buffer, sizeBuffer);
 
 Console.WriteLine("\n================");
 for (int y = 0; y < sizeBuffer; y++)
