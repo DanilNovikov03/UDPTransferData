@@ -2,13 +2,12 @@
 
 namespace UdpProgram.CircularBuffer
 {
-    public class ServerPacketCircularBuffer : MyCircularBuffer<UdpPacket>
+    public class ServerPacketCircularBuffer : PacketCircularBuffer
     {
         // TODO возможен прыжок больше размера буффера
         // todo при добавлении в буффер используется InternalIndex возможно не стоит его каждый раз добавлять
 
         private UdpPacket _emptyPacket;
-        private uint _firstId;
 
         public ServerPacketCircularBuffer(int capacity) : base(capacity)
         {
@@ -35,9 +34,6 @@ namespace UdpProgram.CircularBuffer
 
             AddPacketToBuffer(packet);
         }
-
-        public bool ContainsId(uint packetId) =>
-            IndexOfId(packetId) >= 0;
 
         private bool IsOldPacket(UdpPacket packet) =>
             packet.PacketId < _firstId;
@@ -124,17 +120,6 @@ namespace UdpProgram.CircularBuffer
             _buffer[InternalIndex(newLen - 1)] = packet;
             Count = newLen;
             _end = InternalIndex(Count);
-        }
-
-        private int IndexOfId(uint packetId)
-        {
-            int position = (int)(packetId - _firstId);
-            var packet = _buffer[InternalIndex(position)];
-
-            if (packet != null && packet.PacketId == packetId)
-                return position;
-
-            return -1;
         }
 
         private UdpPacket CreateEmptyPacket()

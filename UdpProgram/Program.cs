@@ -46,7 +46,7 @@ static byte[] GenerateRandomData()
     return data;
 }
 
-static List<UdpPacket> GetUdpPackets(PacketCircucleBuffer buffer, int sizeBuffer)
+static List<UdpPacket> GetUdpPackets(ServerPacketCircularBuffer buffer, int sizeBuffer)
 {
     List<UdpPacket> packets = new List<UdpPacket>();
     for (int i = 0; i < sizeBuffer; i++)
@@ -56,6 +56,15 @@ static List<UdpPacket> GetUdpPackets(PacketCircucleBuffer buffer, int sizeBuffer
 }
 
 static List<UdpPacket> GetUdpPackets2(MyCircularBuffer<UdpPacket> buffer, int sizeBuffer)
+{
+    List<UdpPacket> packets = new List<UdpPacket>();
+    for (int i = 0; i < sizeBuffer; i++)
+        packets.Add(buffer[i]);
+
+    return packets;
+}
+
+static List<UdpPacket> GetUdpPackets3(PacketCircularBuffer buffer, int sizeBuffer)
 {
     List<UdpPacket> packets = new List<UdpPacket>();
     for (int i = 0; i < sizeBuffer; i++)
@@ -85,8 +94,8 @@ await server.StartReceivingAsync();
 
 int sizeBuffer = 5;
 int countPackets = 10;
-PacketCircucleBuffer buffer = new PacketCircucleBuffer(sizeBuffer);
-//MyCircularBuffer<UdpPacket> buffer = new MyCircularBuffer<UdpPacket>(sizeBuffer);
+//ServerPacketCircuclarBuffer buffer = new ServerPacketCircuclarBuffer(sizeBuffer);
+PacketCircularBuffer buffer = new PacketCircularBuffer(sizeBuffer);
 
 List<UdpPacket> packets = new List<UdpPacket>();
 for (int i = 0; i < countPackets; i++)
@@ -96,15 +105,17 @@ for (int i = 0; i < countPackets; i++)
 }
 
 buffer.Add(packets[0]);
-//buffer.Add(packets[1]);
-buffer.Add(packets[2]);
-buffer.Add(packets[2]);
-buffer.Add(packets[4]);
-buffer.Add(packets[4]);
 buffer.Add(packets[1]);
+buffer.Add(packets[2]);
+buffer.Add(packets[3]);
+buffer.Add(packets[4]);
+buffer.Add(packets[5]);
+buffer.Add(packets[6]);
+buffer.Add(packets[7]);
+buffer.Add(packets[8]);
+buffer.Add(packets[9]);
 
-
-var results = GetUdpPackets(buffer, sizeBuffer);
+var results = GetUdpPackets3(buffer, sizeBuffer);
 
 Console.WriteLine("\n================");
 for (int y = 0; y < sizeBuffer; y++)

@@ -59,14 +59,14 @@ namespace UdpProgram.CircularBuffer
                 AddNoFullBuffer(item);
         }
 
-        protected void AddFullBuffer(T item)
+        protected virtual void AddFullBuffer(T item)
         {
             _buffer[_end] = item;
             Increment(ref _end);
             _start = _end;
         }
 
-        protected void AddNoFullBuffer(T item)
+        protected virtual void AddNoFullBuffer(T item)
         {
             _buffer[_end] = item;
             Increment(ref _end);
