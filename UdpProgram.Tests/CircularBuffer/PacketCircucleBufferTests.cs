@@ -12,7 +12,7 @@ namespace UdpProgram.Tests.CircularBuffer
             // arrange
             int sizeBuffer = 5;
             int countPackets = 10;
-            ServerPacketCircuclarBuffer buffer = new ServerPacketCircuclarBuffer(sizeBuffer);
+            ServerPacketCircularBuffer buffer = new ServerPacketCircularBuffer(sizeBuffer);
 
             List<UdpPacket> packets = CreateListUdpPackets(countPackets);
 
@@ -38,7 +38,7 @@ namespace UdpProgram.Tests.CircularBuffer
             // arrange
             int sizeBuffer = 5;
             int countPackets = 10;
-            ServerPacketCircuclarBuffer buffer = new ServerPacketCircuclarBuffer(sizeBuffer);
+            ServerPacketCircularBuffer buffer = new ServerPacketCircularBuffer(sizeBuffer);
 
             List<UdpPacket> packets = CreateListUdpPackets(countPackets);
 
@@ -64,7 +64,7 @@ namespace UdpProgram.Tests.CircularBuffer
             // arrange
             int sizeBuffer = 5;
             int countPackets = 10;
-            ServerPacketCircuclarBuffer buffer = new ServerPacketCircuclarBuffer(sizeBuffer);
+            ServerPacketCircularBuffer buffer = new ServerPacketCircularBuffer(sizeBuffer);
 
             List<UdpPacket> packets = CreateListUdpPackets(countPackets);
 
@@ -89,7 +89,7 @@ namespace UdpProgram.Tests.CircularBuffer
             // arrange
             int sizeBuffer = 5;
             int countPackets = 10;
-            ServerPacketCircuclarBuffer buffer = new ServerPacketCircuclarBuffer(sizeBuffer);
+            ServerPacketCircularBuffer buffer = new ServerPacketCircularBuffer(sizeBuffer);
 
             List<UdpPacket> packets = CreateListUdpPackets(countPackets);
 
@@ -112,7 +112,7 @@ namespace UdpProgram.Tests.CircularBuffer
             // arrange
             int sizeBuffer = 5;
             int countPackets = 10;
-            ServerPacketCircuclarBuffer buffer = new ServerPacketCircuclarBuffer(sizeBuffer);
+            ServerPacketCircularBuffer buffer = new ServerPacketCircularBuffer(sizeBuffer);
 
             List<UdpPacket> packets = CreateListUdpPackets(countPackets);
 
@@ -141,7 +141,7 @@ namespace UdpProgram.Tests.CircularBuffer
             // arrange
             int sizeBuffer = 5;
             int countPackets = 10;
-            ServerPacketCircuclarBuffer buffer = new ServerPacketCircuclarBuffer(sizeBuffer);
+            ServerPacketCircularBuffer buffer = new ServerPacketCircularBuffer(sizeBuffer);
 
             List<UdpPacket> packets = CreateListUdpPackets(countPackets);
 
@@ -168,7 +168,7 @@ namespace UdpProgram.Tests.CircularBuffer
             // arrange
             int sizeBuffer = 5;
             int countPackets = 10;
-            ServerPacketCircuclarBuffer buffer = new ServerPacketCircuclarBuffer(sizeBuffer);
+            ServerPacketCircularBuffer buffer = new ServerPacketCircularBuffer(sizeBuffer);
 
             List<UdpPacket> packets = CreateListUdpPackets(countPackets);
 
@@ -195,7 +195,7 @@ namespace UdpProgram.Tests.CircularBuffer
             // arrange
             int sizeBuffer = 5;
             int countPackets = 10;
-            ServerPacketCircuclarBuffer buffer = new ServerPacketCircuclarBuffer(sizeBuffer);
+            ServerPacketCircularBuffer buffer = new ServerPacketCircularBuffer(sizeBuffer);
 
             List<UdpPacket> packets = CreateListUdpPackets(countPackets);
 
@@ -224,7 +224,7 @@ namespace UdpProgram.Tests.CircularBuffer
             // arrange
             int sizeBuffer = 5;
             int countPackets = 10;
-            ServerPacketCircuclarBuffer buffer = new ServerPacketCircuclarBuffer(sizeBuffer);
+            ServerPacketCircularBuffer buffer = new ServerPacketCircularBuffer(sizeBuffer);
 
             List<UdpPacket> packets = CreateListUdpPackets(countPackets);
 
@@ -251,7 +251,7 @@ namespace UdpProgram.Tests.CircularBuffer
             Assert.Equal(Ids, resultIds);
         }
 
-        private List<UdpPacket> GetUdpPackets(ServerPacketCircuclarBuffer buffer, int sizeBuffer)
+        private List<UdpPacket> GetUdpPackets(ServerPacketCircularBuffer buffer, int sizeBuffer)
         {
             List<UdpPacket> packets = new List<UdpPacket>(sizeBuffer);
             for (int i = 0; i < sizeBuffer; i++)
