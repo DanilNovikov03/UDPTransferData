@@ -35,21 +35,38 @@ namespace UdpProgram.CircularBuffer
             AddPacketToBuffer(packet);
         }
 
-        private void AddPacketToBuffer(UdpPacket packet)
+        public IReadOnlyList<UdpPacket> AddAndEvicted(UdpPacket packet)
+        {
+            if (IsOldPacket(packet.PacketId))
+                return ListArrayEmpty();
+
+            return AddPacketToBuffer(packet);
+        }
+
+
+        private IReadOnlyList<UdpPacket> AddPacketToBuffer(UdpPacket packet)
         {
             if (IsEmpty)
             {
                 AddEmtyBuffer(packet);
-                return;
+
+                return
+                    ListArrayEmpty();
             }
 
+            return 
+                AddBufferAndGetListOldPackets(packet);
+        }
+
+        private IReadOnlyList<UdpPacket> AddBufferAndGetListOldPackets(UdpPacket packet)
+        {
             int position =
                 (int)(packet.PacketId - _firstId);
 
             if (CanInsertWithoutShifting(position))
-                AddBufferFitsInWindow(position, packet);
+                return AddBufferFitsInWindow(position, packet);
             else
-                AddBufferWithWindowShift(position, packet);
+                return AddBufferWithWindowShift(position, packet);
         }
 
         private bool CanInsertWithoutShifting(int position) =>
@@ -63,10 +80,12 @@ namespace UdpProgram.CircularBuffer
             _end = InternalIndex(Count);          
         }
 
-        private void AddBufferFitsInWindow(int position, UdpPacket packet)
+        private IReadOnlyList<UdpPacket> AddBufferFitsInWindow(int position, UdpPacket packet)
         {
             if (ContainsId(packet.PacketId))
-                return;
+                return ListArrayEmpty();
+
+            var oldPacket = IsFull ? this[0] : null;
 
             int idx = InternalIndex(position);
             _buffer[idx] = packet;
@@ -77,6 +96,10 @@ namespace UdpProgram.CircularBuffer
                 EnsureBufferFullState();
             else if (position == Count || !IsFull)
                 RecalculateWindowState(position);
+
+            return oldPacket is null 
+                ? Array.Empty<UdpPacket>()
+                : new[] { oldPacket };
         }
 
         private void AdvanceWindow()
@@ -97,27 +120,52 @@ namespace UdpProgram.CircularBuffer
             _firstId++;
         }
 
-        // TODO rafactore code
-        private void AddBufferWithWindowShift(int position, UdpPacket packet)
+        private IReadOnlyList<UdpPacket> AddBufferWithWindowShift(int position, UdpPacket packet)
         {
-            int newLen = position + 1;           
+            int newLen = position + 1;
+            var oldPackets = new UdpPacket[newLen];
 
-            if (newLen > Capacity)
+            if (NeedsWindowShift(newLen))
+                oldPackets = ShiftWindowAndEvictOldest(newLen);
+
+            Append(packet);
+
+            return oldPackets;
+        }
+
+        private bool NeedsWindowShift(int newLen) =>
+            newLen > Capacity;
+
+        private UdpPacket[] ShiftWindowAndEvictOldest(int count)
+        {
+            var oldPackets = new UdpPacket[count];
+
+            int shift = count - Capacity;
+            int idx;
+
+            for (int i = 0; i < shift; i++)
             {
-                int shift = newLen - Capacity;
-
-                for (int i = 0; i < shift; i++)
-                    _buffer[InternalIndex(i)] = null;
-
-                _start = InternalIndex(shift);     
-                _firstId += (uint)shift;           
-                newLen = Capacity;                 
+                idx = InternalIndex(i);
+                oldPackets[i] = _buffer[idx];
+                _buffer[idx] = null;
             }
 
-            _buffer[InternalIndex(newLen - 1)] = packet;
-            Count = newLen;
+            _start = InternalIndex(shift);
+            _firstId += (uint)shift;
+
+            return oldPackets;
+        }
+
+        private void Append(UdpPacket packet)
+        {
+            _buffer[InternalIndex(Capacity - 1)] = packet;
+
+            Count = Capacity;
             _end = InternalIndex(Count);
         }
+
+        private IReadOnlyList<UdpPacket> ListArrayEmpty() =>
+            Array.Empty<UdpPacket>();
 
         private UdpPacket CreateEmptyPacket()
         {
