@@ -252,7 +252,7 @@ namespace UdpProgram.Tests.CircularBuffer
         }
 
 
-        // Tests methon AddAndEvicted
+        // Tests method AddAndEvicted
         [Fact]
         public void AddAndEvicted_WhenBufferEmpty_ReturnsEmptyList()
         {
@@ -320,7 +320,7 @@ namespace UdpProgram.Tests.CircularBuffer
             Assert.True(buffer.ContainsId(2));
         }
 
-        [Fact(Skip = "баг: IndexOfId не проверяет packetId >= _firstId перед вычислением позиции, вызывает IndexOutOfRangeException при ContainsId для old packet")]
+        [Fact]
         public void AddAndEvicted_WhenOldPacket_ReturnsEmptyList()
         {
             // arrange
@@ -589,3 +589,14 @@ namespace UdpProgram.Tests.CircularBuffer
         }
     }
 }
+
+/*
+ *    ServerPacketCircularBuffer.ShiftWindowAndEvictOldest (строка 115-130)
+ *    Проблема: создаёт массив размера `count`, но заполняет только первые `shift` элементов.
+ *    Возвращает массив большего размера с null-хвостом.
+ *    Ожидается: вернуть только первые `shift` элементов (new UdpPacket[shift]).
+ *    Затронутые тесты:
+ *    - AddAndEvicted_WhenForwardJump_EvictsMultiplePackets (возвращает 10 вместо 4)
+ *    - AddAndEvicted_WhenJumpExceedsCapacity_NoDuplicatesInEvicted (возвращает 16 вместо 10)
+ *    - AddAndEvicted_MixedSequence_WindowStateMatchesExpected (возвращает 14 вместо 6)
+ */

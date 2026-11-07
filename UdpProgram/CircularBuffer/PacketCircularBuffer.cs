@@ -20,8 +20,12 @@ namespace UdpProgram.CircularBuffer
         public override void Add(UdpPacket item) =>
             base.Add(item);
 
-        public bool ContainsId(uint packetId) =>
-            IndexOfId(packetId) >= 0;
+        public bool ContainsId(uint packetId)
+        {
+            return packetId >= _firstId 
+                ? IndexOfId(packetId) >= 0 
+                : false;
+        }
 
         protected override void AddFullBuffer(UdpPacket item)
         {
