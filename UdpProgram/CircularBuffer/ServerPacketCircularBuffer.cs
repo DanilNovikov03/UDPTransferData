@@ -123,10 +123,10 @@ namespace UdpProgram.CircularBuffer
         private IReadOnlyList<UdpPacket> AddBufferWithWindowShift(int position, UdpPacket packet)
         {
             int newLen = position + 1;
-            var oldPackets = new UdpPacket[newLen];
+            //var oldPackets = new UdpPacket[newLen]; временно  
 
-            if (NeedsWindowShift(newLen))
-                oldPackets = ShiftWindowAndEvictOldest(newLen);
+            //if (NeedsWindowShift(newLen)) временно 
+            var oldPackets = ShiftWindowAndEvictOldest(newLen);
 
             Append(packet);
 
@@ -138,16 +138,20 @@ namespace UdpProgram.CircularBuffer
 
         private UdpPacket[] ShiftWindowAndEvictOldest(int count)
         {
-            var oldPackets = new UdpPacket[count];
-
             int shift = count - Capacity;
-            int idx;
+
+            //var oldPackets = CreateEmptyUdpArray(count);
+            var oldPackets = CreateEmptyUdpArray(shift);
 
             for (int i = 0; i < shift; i++)
             {
-                idx = InternalIndex(i);
-                oldPackets[i] = this[idx];
-                _buffer[idx] = null;
+                // Old realization
+                //idx = InternalIndex(i); 
+                //oldPackets[i] = this[idx];
+                //_buffer[idx] = null;
+
+                oldPackets[i] = this[i];
+                this[i] = null;
             }
 
             _start = InternalIndex(shift);
@@ -175,23 +179,9 @@ namespace UdpProgram.CircularBuffer
                 Array.Empty<byte>()
             );
         }
+
+        private UdpPacket[] CreateEmptyUdpArray(int length) => 
+            Enumerable.Repeat(EmptyPacket, length).ToArray();
     }
 }
 
-/*
- * НАЙДЕННЫЕ БАГИ В КОДЕ:
- *
- * 1. PacketCircularBuffer.IndexOfId (строка 43)
- *    Проблема: не проверяет packetId >= _firstId перед вычислением (int)(packetId - _firstId).
- *    При packetId < _firstId результат отрицательный → IndexOutOfRangeException.
- *    Затронутые тесты: AddAndEvicted_WhenOldPacket_ReturnsEmptyList
- *
- * 2. ServerPacketCircularBuffer.ShiftWindowAndEvictOldest (строка 115-130)
- *    Проблема: создаёт массив размера `count`, но заполняет только первые `shift` элементов.
- *    Возвращает массив большего размера с null-хвостом.
- *    Ожидается: вернуть только первые `shift` элементов (new UdpPacket[shift]).
- *    Затронутые тесты:
- *    - AddAndEvicted_WhenForwardJump_EvictsMultiplePackets (возвращает 10 вместо 4)
- *    - AddAndEvicted_WhenJumpExceedsCapacity_NoDuplicatesInEvicted (возвращает 16 вместо 10)
- *    - AddAndEvicted_MixedSequence_WindowStateMatchesExpected (возвращает 14 вместо 6)
- */

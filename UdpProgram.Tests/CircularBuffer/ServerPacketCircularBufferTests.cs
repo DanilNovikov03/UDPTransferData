@@ -381,7 +381,7 @@ namespace UdpProgram.Tests.CircularBuffer
             Assert.Equal(new uint[] { 1, 2, 3, 4, 5, 6 }, ids);
         }
 
-        [Fact(Skip = "баг: ShiftWindowAndEvictOldest возвращает массив размера count (10), а не shift (4). Первые 4 элемента заполнены, остальные 6 — null")]
+        [Fact]
         public void AddAndEvicted_WhenForwardJump_EvictsMultiplePackets()
         {
             // arrange
@@ -420,7 +420,7 @@ namespace UdpProgram.Tests.CircularBuffer
             Assert.Equal(new uint[] { 4, 5, 0, 0, 0, 9 }, ids);
         }
 
-        [Fact(Skip = "баг: ShiftWindowAndEvictOldest возвращает массив размера count (16), а не shift (10). Первые 10 элементов заполнены, остальные 6 — null")]
+        [Fact(Skip = "баг: не решён вопрос прыжка больше буффера")]
         public void AddAndEvicted_WhenJumpExceedsCapacity_NoDuplicatesInEvicted()
         {
             // arrange
@@ -481,7 +481,7 @@ namespace UdpProgram.Tests.CircularBuffer
             Assert.Empty(buffer[1].Data);
         }
 
-        [Fact(Skip = "баг: ShiftWindowAndEvictOldest возвращает массив размера count (14), а не shift (6). Первые 6 элементов заполнены, остальные 8 — null")]
+        [Fact]
         public void AddAndEvicted_MixedSequence_WindowStateMatchesExpected()
         {
             // arrange
@@ -589,14 +589,3 @@ namespace UdpProgram.Tests.CircularBuffer
         }
     }
 }
-
-/*
- *    ServerPacketCircularBuffer.ShiftWindowAndEvictOldest (строка 115-130)
- *    Проблема: создаёт массив размера `count`, но заполняет только первые `shift` элементов.
- *    Возвращает массив большего размера с null-хвостом.
- *    Ожидается: вернуть только первые `shift` элементов (new UdpPacket[shift]).
- *    Затронутые тесты:
- *    - AddAndEvicted_WhenForwardJump_EvictsMultiplePackets (возвращает 10 вместо 4)
- *    - AddAndEvicted_WhenJumpExceedsCapacity_NoDuplicatesInEvicted (возвращает 16 вместо 10)
- *    - AddAndEvicted_MixedSequence_WindowStateMatchesExpected (возвращает 14 вместо 6)
- */
